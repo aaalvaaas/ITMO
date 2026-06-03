@@ -1,0 +1,22 @@
+name: little-to-big-endian
+limit: 10000
+memory_size: 8192
+memory_mapped_io:
+  0x80: [0xaabbccdd]
+  0x84: []
+reports:
+  - name: Step-by-step
+    slice: ["tail", 100]
+    view: |
+      T A S {T:hex} {A:hex} {S:hex} R {R}
+      {pc}: {instruction}   {pc:label}
+  - name: Result
+    slice: last
+    filter:
+      - state
+    view: |
+      numio[0x80]: {io:0x80:hex}
+      numio[0x84]: {io:0x84:hex}
+    assert: |
+      numio[0x80]: [] >>> []
+      numio[0x84]: [] >>> [0xddccbbaa]

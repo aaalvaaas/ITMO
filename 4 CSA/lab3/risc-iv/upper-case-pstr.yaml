@@ -1,0 +1,34 @@
+name: "assert upper_case_pstr('12345678901234567890123456789012\n3') == ([-858993460], '\n3')"
+limit: 2000
+memory_size: 0x1000
+memory_mapped_io:
+  0x80: [49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 10, 51]
+  0x84: []
+reports:
+  - name: Step-by-step
+    slice: ["tail", 20]
+    view: |
+      === STEP ===
+      PC: {pc:hex} ({pc:label})
+      INSTR: {instruction}
+      REGS: T0={T0:hex} T1={T1:hex} T2={T2:hex} A0={A0:hex}
+      REGS: S0Fp={S0Fp:hex} S1={S1:hex} S2={S2:hex} S3={S3:hex}
+      MEM[buffer]: {memory:0x00:0x20}
+      IO_IN: {io:0x80:dec}
+      IO_OUT: {io:0x84:dec}
+      ---
+
+  - name: Check results
+    slice: last
+    filter:
+      - state
+    view: |
+      numio[0x80]: {io:0x80:dec}
+      numio[0x84]: {io:0x84:dec}
+      symio[0x80]: {io:0x80:sym}
+      symio[0x84]: {io:0x84:sym}
+    assert: |
+      numio[0x80]: [10,51] >>> []
+      numio[0x84]: [] >>> [-858993460] 
+      symio[0x80]: "\n3" >>> ""
+      symio[0x84]: "" >>> "?"
